@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Number Guessing Game</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="game-container">
+    <header class="header">
+      <h1>🎯 Number Guessing Game</h1>
+      <p class="subtitle">I'm thinking of a number between 1 and 100. Can you guess it?</p>
+    </header>
+
+    <main class="game-area">
+      <div id="play-screen">
+        <div class="guess-section">
+          <label for="guess-input">Your guess:</label>
+          <input type="number" id="guess-input" min="1" max="100" placeholder="1–100" autofocus>
+          <button id="guess-btn" class="btn btn-primary">Guess</button>
+        </div>
+        <p id="feedback" class="feedback"></p>
+        <p id="guess-count" class="guess-count"></p>
+        <div class="range-hint" id="range-hint">
+          <span id="range-low">1</span> — <span id="range-high">100</span>
+        </div>
+      </div>
+
+      <div id="win-screen" class="hidden">
+        <h2>🎉 You got it!</h2>
+        <p class="win-message">The number was <strong id="secret-number"></strong>.</p>
+        <p class="guesses-used">You got it in <strong id="total-guesses">0</strong> guess<span id="guess-plural">es</span>!</p>
+        <button id="play-again-btn" class="btn btn-primary">Play Again</button>
+      </div>
+    </main>
+  </div>
+  <script src="game.js"></script>
+</body>
+</html>
