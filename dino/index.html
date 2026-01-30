@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Colorful Dino Run</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Fredoka One', cursive;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #ffecd2 100%);
+      background-size: 400% 400%;
+      animation: gradientShift 8s ease infinite;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    @keyframes gradientShift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    h1 {
+      color: #fff;
+      text-shadow: 3px 3px 0 #f5576c, 6px 6px 0 rgba(0,0,0,0.2);
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      letter-spacing: 2px;
+    }
+
+    #gameCanvas {
+      border: 5px solid #fff;
+      border-radius: 12px;
+      background: linear-gradient(to bottom, #87CEEB 0%, #E0F6FF 40%, #90EE90 70%, #228B22 100%);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3), inset 0 0 80px rgba(255,255,255,0.1);
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    .ui {
+      display: flex;
+      align-items: center;
+      gap: 30px;
+      margin-top: 15px;
+    }
+
+    .score-box {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 12px 24px;
+      border-radius: 50px;
+      color: #764ba2;
+      font-size: 1.4rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    .hint {
+      color: rgba(255,255,255,0.95);
+      font-size: 1rem;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    }
+
+    .game-over-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .game-over-overlay.visible {
+      display: flex;
+    }
+
+    .game-over-box {
+      background: linear-gradient(145deg, #fff 0%, #f0f0f0 100%);
+      padding: 40px 50px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+      border: 4px solid #fff;
+    }
+
+    .game-over-box h2 {
+      color: #f5576c;
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+    }
+
+    .game-over-box .final-score {
+      color: #764ba2;
+      font-size: 1.8rem;
+      margin-bottom: 25px;
+    }
+
+    .restart-btn {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.2rem;
+      padding: 14px 32px;
+      border: none;
+      border-radius: 50px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .restart-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+    }
+
+    .start-screen {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+
+    .start-screen.hidden {
+      display: none;
+    }
+
+    .start-btn {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.5rem;
+      padding: 18px 45px;
+      border: none;
+      border-radius: 50px;
+      background: linear-gradient(135deg, #f5576c, #f093fb);
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 8px 30px rgba(245, 87, 108, 0.5);
+      transition: transform 0.2s;
+    }
+
+    .start-btn:hover {
+      transform: scale(1.08);
+    }
+
+    .start-screen p {
+      color: #fff;
+      margin-top: 20px;
+      font-size: 1.1rem;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    }
+  </style>
+</head>
+<body>
+  <h1>🦕 Colorful Dino Run</h1>
+  <canvas id="gameCanvas" width="800" height="400"></canvas>
+  <div class="ui">
+    <div class="score-box">Score: <span id="score">0</span></div>
+    <span class="hint">Space or Click to jump!</span>
+  </div>
+
+  <div class="start-screen" id="startScreen">
+    <button class="start-btn" id="startBtn">Play!</button>
+    <p>Jump over the cacti. Don't get hit!</p>
+  </div>
+
+  <div class="game-over-overlay" id="gameOverOverlay">
+    <div class="game-over-box">
+      <h2>Game Over!</h2>
+      <p class="final-score">Score: <span id="finalScore">0</span></p>
+      <button class="restart-btn" id="restartBtn">Play Again</button>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const GRAVITY = 0.6;
+    const JUMP_FORCE = -14;
+    const GROUND_Y = 340;
+    const DINO_WIDTH = 50;
+    const DINO_HEIGHT = 55;
+    const CACTUS_WIDTH = 35;
+    const CACTUS_MIN_H = 45;
+    const CACTUS_MAX_H = 85;
+    const INITIAL_SPEED = 6;
+    const SPEED_INCREMENT = 0.002;
+
+    let gameRunning = false;
+    let score = 0;
+    let speed = INITIAL_SPEED;
+    let dino = {
+      x: 80,
+      y: GROUND_Y - DINO_HEIGHT,
+      vy: 0,
+      width: DINO_WIDTH,
+      height: DINO_HEIGHT
+    };
+    let cacti = [];
+    let frames = 0;
+    let lastCactusFrame = 0;
+    let cactusInterval = 90;
+
+    const colors = {
+      dino: ['#4CAF50', '#81C784', '#2E7D32'],
+      cactus: ['#FF6B6B', '#FFE66D', '#4ECDC4', '#A855F7', '#F472B6'],
+      ground: ['#8B4513', '#A0522D', '#CD853F']
+    };
+
+    function randomChoice(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function initGame() {
+      dino.y = GROUND_Y - DINO_HEIGHT;
+      dino.vy = 0;
+      cacti = [];
+      score = 0;
+      speed = INITIAL_SPEED;
+      frames = 0;
+      lastCactusFrame = 0;
+      document.getElementById('score').textContent = '0';
+    }
+
+    function drawGround() {
+      const segmentWidth = 40;
+      const segments = Math.ceil(canvas.width / segmentWidth) + 2;
+      const offset = (frames * speed * 0.5) % segmentWidth;
+
+      ctx.fillStyle = '#228B22';
+      ctx.fillRect(0, GROUND_Y, canvas.width, canvas.height - GROUND_Y);
+
+      ctx.strokeStyle = '#2d5a27';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(0, GROUND_Y);
+      for (let i = -1; i < segments; i++) {
+        const x = i * segmentWidth - offset;
+        ctx.lineTo(x, GROUND_Y + (i % 2 === 0 ? 0 : 5));
+      }
+      ctx.lineTo(canvas.width + 100, GROUND_Y);
+      ctx.stroke();
+
+      for (let i = 0; i < 20; i++) {
+        const x = ((i * 60 - offset) % (canvas.width + 60)) - 20;
+        ctx.fillStyle = randomChoice(colors.ground);
+        ctx.fillRect(x, GROUND_Y + 5 + (i % 3) * 4, 15, 8);
+      }
+    }
+
+    function drawDino() {
+      const x = dino.x;
+      const y = dino.y;
+      const w = dino.width;
+      const h = dino.height;
+      const g = GROUND_Y;
+
+      const bounce = Math.abs(Math.sin(frames * 0.2)) * 2;
+      const legCycle = gameRunning ? (Math.floor(frames / 6) % 2) : 0;
+      const legSwing = legCycle ? 8 : -4;
+      const tailSway = Math.sin(frames * 0.15) * 4;
+
+      ctx.save();
+
+      // —— Tail (thick, curves back) ——
+      ctx.fillStyle = colors.dino[0];
+      ctx.beginPath();
+      ctx.moveTo(x + 18, y + h - 12);
+      ctx.quadraticCurveTo(x - 8 + tailSway, y + h - 25, x - 5, y + 22);
+      ctx.quadraticCurveTo(x + 5, y + 28, x + 20, y + h - 8);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = colors.dino[2];
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // —— Body (rounded belly) ——
+      ctx.fillStyle = colors.dino[1];
+      ctx.beginPath();
+      ctx.ellipse(x + 28, y + 32, 16, 22, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = colors.dino[2];
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // —— Neck ——
+      ctx.fillStyle = colors.dino[1];
+      ctx.fillRect(x + 38, y + 12, 14, 22);
+      ctx.strokeRect(x + 38, y + 12, 14, 22);
+
+      // —— Head (T-Rex style, rounded with jaw) ——
+      ctx.fillStyle = colors.dino[0];
+      ctx.beginPath();
+      ctx.ellipse(x + 52, y + 14, 16, 14, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Jaw / mouth line
+      ctx.strokeStyle = colors.dino[2];
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(x + 52, y + 16, 10, 0.2 * Math.PI, 0.85 * Math.PI);
+      ctx.stroke();
+
+      // Eye
+      ctx.fillStyle = '#1a1a1a';
+      ctx.beginPath();
+      ctx.ellipse(x + 58, y + 10, 4, 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(x + 59, y + 9, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // —— Arms (small T-Rex arms) ——
+      ctx.fillStyle = colors.dino[2];
+      ctx.fillRect(x + 42, y + 28, 6, 10);
+      ctx.fillRect(x + 38, y + 32, 5, 8);
+
+      // —— Legs (thigh + calf, animated) ——
+      const l1 = legSwing;
+      const l2 = -legSwing;
+      const footY = g - 4 + bounce;
+
+      ctx.fillStyle = colors.dino[0];
+      ctx.fillRect(x + 22, y + h - 18, 12, 14 + l1);
+      ctx.fillRect(x + 20, footY, 10, 5);
+      ctx.fillStyle = colors.dino[2];
+      ctx.strokeRect(x + 22, y + h - 18, 12, 14 + l1);
+      ctx.strokeRect(x + 20, footY, 10, 5);
+
+      ctx.fillStyle = colors.dino[0];
+      ctx.fillRect(x + 36, y + h - 16, 12, 14 + l2);
+      ctx.fillRect(x + 34, footY, 10, 5);
+      ctx.fillStyle = colors.dino[2];
+      ctx.strokeRect(x + 36, y + h - 16, 12, 14 + l2);
+      ctx.strokeRect(x + 34, footY, 10, 5);
+
+      ctx.restore();
+    }
+
+    function drawCactus(c) {
+      const x = c.x;
+      const y = GROUND_Y - c.height;
+      const w = CACTUS_WIDTH;
+      const h = c.height;
+
+      ctx.fillStyle = c.color;
+      ctx.fillRect(x + 8, y, w - 16, h);
+
+      ctx.fillStyle = '#2d8a2d';
+      ctx.fillRect(x + 5, y + h - 15, 8, 15);
+      ctx.fillRect(x + w - 13, y + h - 25, 8, 18);
+
+      ctx.fillStyle = '#f0fff0';
+      ctx.fillRect(x + 12, y + 15, 4, 8);
+      ctx.fillRect(x + w - 16, y + 35, 4, 8);
+    }
+
+    function jump() {
+      if (!gameRunning) return;
+      if (dino.y >= GROUND_Y - DINO_HEIGHT - 5) {
+        dino.vy = JUMP_FORCE;
+      }
+    }
+
+    function spawnCactus() {
+      const h = CACTUS_MIN_H + Math.random() * (CACTUS_MAX_H - CACTUS_MIN_H);
+      cacti.push({
+        x: canvas.width,
+        height: h,
+        color: randomChoice(colors.cactus)
+      });
+    }
+
+    function collides(a, b) {
+      const margin = 8;
+      return a.x + margin < b.x + CACTUS_WIDTH - margin &&
+             a.x + DINO_WIDTH - margin > b.x + margin &&
+             dino.y + DINO_HEIGHT - 15 > GROUND_Y - b.height;
+    }
+
+    function update() {
+      if (!gameRunning) return;
+
+      frames++;
+      dino.vy += GRAVITY;
+      dino.y += dino.vy;
+
+      if (dino.y >= GROUND_Y - DINO_HEIGHT) {
+        dino.y = GROUND_Y - DINO_HEIGHT;
+        dino.vy = 0;
+      }
+
+      speed = INITIAL_SPEED + frames * SPEED_INCREMENT;
+      const interval = Math.max(45, cactusInterval - Math.floor(frames / 100));
+      if (frames - lastCactusFrame > interval) {
+        spawnCactus();
+        lastCactusFrame = frames;
+      }
+
+      for (let i = cacti.length - 1; i >= 0; i--) {
+        cacti[i].x -= speed;
+        if (cacti[i].x + CACTUS_WIDTH < 0) {
+          cacti.splice(i, 1);
+          score++;
+          document.getElementById('score').textContent = score;
+        } else if (collides(dino, cacti[i])) {
+          gameOver();
+          return;
+        }
+      }
+    }
+
+    function gameOver() {
+      gameRunning = false;
+      document.getElementById('finalScore').textContent = score;
+      document.getElementById('gameOverOverlay').classList.add('visible');
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawGround();
+      drawDino();
+      cacti.forEach(drawCactus);
+    }
+
+    function loop() {
+      update();
+      draw();
+      requestAnimationFrame(loop);
+    }
+
+    document.getElementById('startBtn').addEventListener('click', () => {
+      document.getElementById('startScreen').classList.add('hidden');
+      initGame();
+      gameRunning = true;
+    });
+
+    document.getElementById('restartBtn').addEventListener('click', () => {
+      document.getElementById('gameOverOverlay').classList.remove('visible');
+      initGame();
+      gameRunning = true;
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        jump();
+      }
+    });
+
+    canvas.addEventListener('click', jump);
+
+    loop();
+  </script>
+</body>
+</html>
