@@ -1,0 +1,244 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg-dark: #1a0a0f;
+  --bg-card: #2d1520;
+  --accent-gold: #c9a227;
+  --accent-maroon: #740001;
+  --accent-dim: #ae8c21;
+  --text: #f5e6d3;
+  --text-muted: #b8a090;
+  --success: #2e7d32;
+  --error: #c62828;
+  --border: #4a2c35;
+}
+
+body {
+  font-family: 'Crimson Text', Georgia, serif;
+  background: var(--bg-dark);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(201, 162, 39, 0.12), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 100%, rgba(116, 0, 1, 0.15), transparent);
+}
+
+.game-container {
+  width: 100%;
+  max-width: 480px;
+  padding: 1.5rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.header h1 {
+  font-family: 'Cinzel', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent-gold);
+  letter-spacing: 0.02em;
+}
+
+.score-board {
+  display: flex;
+  gap: 1.25rem;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
+
+.score-board strong {
+  color: var(--text);
+}
+
+.game-area {
+  background: var(--bg-card);
+  border-radius: 1rem;
+  border: 2px solid var(--border);
+  padding: 2rem;
+  min-height: 380px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+}
+
+#start-screen {
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.tagline {
+  font-size: 1.15rem;
+  color: var(--text-muted);
+  margin-bottom: 2rem;
+  font-style: italic;
+}
+
+.btn {
+  font-family: 'Cinzel', serif;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.875rem 1.75rem;
+  border: 2px solid var(--accent-gold);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  background: transparent;
+  color: var(--accent-gold);
+  transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  background: rgba(201, 162, 39, 0.15);
+  box-shadow: 0 6px 24px rgba(201, 162, 39, 0.3);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent-maroon), #5c0001);
+  color: var(--accent-gold);
+  border-color: var(--accent-gold);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #8c0012, var(--accent-maroon));
+}
+
+.clue-box {
+  background: var(--bg-dark);
+  border: 2px solid var(--accent-gold);
+  border-radius: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.clue-text {
+  font-size: 1.1rem;
+  color: var(--text);
+  text-align: center;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+.prompt {
+  font-family: 'Cinzel', serif;
+  font-size: 1rem;
+  color: var(--text-muted);
+  margin-bottom: 1.25rem;
+  text-align: center;
+}
+
+.answers {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.answer-btn {
+  font-family: 'Crimson Text', serif;
+  font-size: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-dark);
+  color: var(--text);
+  border: 2px solid var(--border);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+
+.answer-btn:hover:not(:disabled) {
+  border-color: var(--accent-gold);
+  background: rgba(201, 162, 39, 0.08);
+  color: var(--text);
+}
+
+.answer-btn:disabled {
+  cursor: default;
+  opacity: 0.9;
+}
+
+.answer-btn.correct {
+  border-color: var(--success);
+  background: rgba(46, 125, 50, 0.2);
+  color: #81c784;
+}
+
+.answer-btn.wrong {
+  border-color: var(--error);
+  background: rgba(198, 40, 40, 0.2);
+  color: #e57373;
+}
+
+.feedback {
+  margin-top: 1rem;
+  text-align: center;
+  font-weight: 600;
+  min-height: 1.5em;
+  font-family: 'Cinzel', serif;
+}
+
+.feedback.correct {
+  color: var(--success);
+}
+
+.feedback.wrong {
+  color: var(--error);
+}
+
+.hidden {
+  display: none !important;
+}
+
+#end-screen {
+  text-align: center;
+  padding: 2rem 0;
+}
+
+#end-screen h2 {
+  font-family: 'Cinzel', serif;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: var(--accent-gold);
+}
+
+.final-score {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+}
+
+.final-score strong {
+  color: var(--accent-gold);
+  font-size: 1.25rem;
+}
+
+@media (max-width: 400px) {
+  .game-container {
+    padding: 1rem;
+  }
+  .game-area {
+    padding: 1.5rem;
+  }
+  .clue-text {
+    font-size: 1rem;
+  }
+}
